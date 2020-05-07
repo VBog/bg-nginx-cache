@@ -3,7 +3,7 @@
     Plugin Name: Bg Nginx Cache Reset
     Plugin URI: https://bogaiskov.ru
     Description: Сброс кеш Nginx вручную и при сохранении постов 
-    Version: 1.0
+    Version: 1.1
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -37,7 +37,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_NGINX_CACHE_VERSION', '1.0');
+define('BG_NGINX_CACHE_VERSION', '1.1');
 define('BG_NGINX_CACHE_LOG', dirname(__FILE__ ).'/bg_nginx_cache.log');
 
 
@@ -77,14 +77,30 @@ function bg_nginx_cache_reset ( $post_id ) {
 add_action( 'admin_bar_menu', 'bg_nginx_cache_reset_current_page', 100 );
 function bg_nginx_cache_reset_current_page() {
     global $wp, $wp_admin_bar;
-	if ( !is_super_admin() || !is_admin_bar_showing() ) return;
+	if ( is_admin() || !is_super_admin() || !is_admin_bar_showing() ) return;
 	
 	$href = wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url='.site_url( $wp->request ), 'bg_nginx_cache');
 	
-	$wp_admin_bar->add_menu(
-		array( 'id' => 'edit-theme',
-			'title' => 'Сбросить кеш страницы',
-			'href' => $href
+	$wp_admin_bar->add_menu (
+		array ( 
+			'id' => 'reset_nginx_cache',
+			'title' => 'Сброс Nginx Cache',
+		)
+	);
+	$wp_admin_bar->add_menu (
+		array ( 
+			'parent' => 'reset_nginx_cache', // параметр id из первой ссылки
+			'id' => 'reset_current_page',
+			'title' => 'Текущая страница',
+			'href' => wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url='.site_url( $wp->request ), 'bg_nginx_cache')
+		)
+	);
+	$wp_admin_bar->add_menu (
+		array ( 
+			'parent' => 'reset_nginx_cache', // параметр id из первой ссылки
+			'id' => 'reset_all',
+			'title' => 'Весь сайт',
+			'href' => wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url=*', 'bg_nginx_cache')
 		)
 	);
 }
