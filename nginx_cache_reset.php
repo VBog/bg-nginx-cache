@@ -3,7 +3,7 @@
     Plugin Name: Bg Nginx Cache Reset
     Plugin URI: https://bogaiskov.ru
     Description: Сброс кеш Nginx вручную и при сохранении постов 
-    Version: 1.1
+    Version: 1.1.1
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -37,7 +37,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_NGINX_CACHE_VERSION', '1.1');
+define('BG_NGINX_CACHE_VERSION', '1.1.1');
 define('BG_NGINX_CACHE_LOG', dirname(__FILE__ ).'/bg_nginx_cache.log');
 
 
@@ -79,7 +79,9 @@ function bg_nginx_cache_reset_current_page() {
     global $wp, $wp_admin_bar;
 	if ( is_admin() || !is_super_admin() || !is_admin_bar_showing() ) return;
 	
-	$href = wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url='.site_url( $wp->request ), 'bg_nginx_cache');
+	$slug = $wp->request;
+	if (!$slug) $slug = '/';
+	$href = wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url='.site_url( $slug ), 'bg_nginx_cache');
 	
 	$wp_admin_bar->add_menu (
 		array ( 
@@ -92,7 +94,7 @@ function bg_nginx_cache_reset_current_page() {
 			'parent' => 'reset_nginx_cache', // параметр id из первой ссылки
 			'id' => 'reset_current_page',
 			'title' => 'Текущая страница',
-			'href' => wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url='.site_url( $wp->request ), 'bg_nginx_cache')
+			'href' => wp_nonce_url(plugin_dir_url( __FILE__ ).'reset_curent_page.php?url='.site_url( $slug ), 'bg_nginx_cache')
 		)
 	);
 	$wp_admin_bar->add_menu (
@@ -119,12 +121,13 @@ function reset_nginx_cache ($url) {
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Update: 1'));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	
+	curl_setopt($ch, CURLOPT_NOBODY, 1);
+	curl_setopt($ch, CURLOPT_HEADER, 1);	
+
 	// загрузка страницы и выдача её браузеру
     if( ! $result = curl_exec($ch)) {
         trigger_error(curl_error($ch));
     }
-
 	// завершение сеанса и освобождение ресурсов
 	curl_close($ch);
 	

@@ -17,8 +17,8 @@ if ($post_url == '*') {
 	</div>
 <?php
 } else {
-	reset_nginx_cache ($post_url);
-	error_log(date ("Y-m-d H:i:s")." Reset cache of current page URL=".$post_url.PHP_EOL, 3, BG_NGINX_CACHE_LOG);
+	$result = reset_nginx_cache ($post_url);
+	error_log(date ("Y-m-d H:i:s")." Reset cache of current page URL=".$post_url. PHP_EOL .$result. PHP_EOL, 3, BG_NGINX_CACHE_LOG);
 	wp_redirect( $post_url );
 }
 exit();
