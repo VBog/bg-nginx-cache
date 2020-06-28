@@ -3,7 +3,7 @@
     Plugin Name: Bg Nginx Cache Reset
     Plugin URI: https://bogaiskov.ru
     Description: Сброс кеш Nginx вручную и при сохранении постов 
-    Version: 1.1.1
+    Version: 1.1.2
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -59,17 +59,22 @@ function bg_nginx_cache_reset ( $post_id ) {
 	error_log(date ("Y-m-d H:i:s")." Reset cache of home page URL=".$post_url.PHP_EOL, 3, BG_NGINX_CACHE_LOG);
 	
 	// Сбрасываем кеш рубрик
-	foreach( get_the_category($post_id) as $category ){ 
-		$post_url = get_category_link( $category->term_id );
-		reset_nginx_cache ($post_url);
-		error_log(date ("Y-m-d H:i:s")." Reset cache of category page URL=".$post_url.PHP_EOL, 3, BG_NGINX_CACHE_LOG);
+	$categories = get_the_category($post_id);
+	if (!empty($categories)) {
+		foreach($categories as $category ){ 
+			$post_url = get_category_link( $category->term_id );
+			reset_nginx_cache ($post_url);
+			error_log(date ("Y-m-d H:i:s")." Reset cache of category page URL=".$post_url.PHP_EOL, 3, BG_NGINX_CACHE_LOG);
+		}
 	}
-	
 	// Сбрасываем кеш меток
-	foreach( get_the_tags($post_id) as $tag ){ 
-		$post_url = get_tag_link( $tag->term_id );
-		reset_nginx_cache ($post_url);
-		error_log(date ("Y-m-d H:i:s")." Reset cache of tag page URL=".$post_url.PHP_EOL, 3, BG_NGINX_CACHE_LOG);
+	$tags = get_the_tags($post_id);
+	if (!empty($tags)) {
+		foreach( $tags as $tag ){ 
+			$post_url = get_tag_link( $tag->term_id );
+			reset_nginx_cache ($post_url);
+			error_log(date ("Y-m-d H:i:s")." Reset cache of tag page URL=".$post_url.PHP_EOL, 3, BG_NGINX_CACHE_LOG);
+		}
 	}
 }
 
